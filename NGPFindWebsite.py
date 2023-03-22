@@ -4,17 +4,17 @@ import re
 import pandas as pd
 import time
 import os
-
+from tldextract import extract
 #if you get 88640 code turn on VPN
 
 start = time.time()
-df = pd.read_csv("PPP1.csv") #check name of csv from where data is being read
+df = pd.read_csv("public_150k_plus_230101.csv") #check name of csv from where data is being read
 outdf = pd.DataFrame(columns=["Business Name", "URL"])
-filterout = ["dnb", "facebook", "linkedin", "bbb", "buildzoom"] #list of websites/keywords to filter out
+filterout = ["dnb", "facebook", "linkedin", "bbb", "buildzoom","yelp","bloomberg","imdb","indeed","glassdoor","youtube",".gov"] #list of websites/keywords to filter out
 
 results = 1 #can select how many google search results to return / not working 100%
-lower = ____ #lower index from data.csv to search **CHANGE ME**
-upper = ____ #upper index **CHANGE ME*
+lower = 0 #lower index from data.csv to search **CHANGE ME**
+upper = 100000 #upper index **CHANGE ME*
 
 headers = {"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit 537.36 (KHTML, like Gecko) Chrome",
 "Accept":"text/html,application/xhtml+xml,application/xml; q=0.9,image/webp,*/*;q=0.8"}
@@ -29,7 +29,7 @@ for i in range(lower, upper):
     if str(City) == "nan":
         query = str(busName)
     else:
-        query = str(busName)
+        query = str(busName)+ "+" +str(City)
     search = query.replace(" ", "+")
     url = f"https://www.google.com/search?q={search}&ie=utf-8&oe=utf-8"
     try:
@@ -55,14 +55,8 @@ for i in range(lower, upper):
                                 if j in s:
                                     rem = True
                             if rem == False:
-                                if "https://www." in str(s):
-                                    s = s.replace("https://www.", "")
-                                elif "http://www." in str(s):
-                                    s = s.replace("http://www.", "")
-                                elif "https://" in str(s):
-                                    s = s.replace("https://", "")
-                                else:
-                                    s = s.replace("http://", "")
+                                ext = extract(s)
+                                s = ext.registered_domain
                                 up = True
                                 outdf.loc[len(outdf.index)] = [busName, s.replace("/", "")]
             if up == False:
@@ -80,4 +74,3 @@ for i in range(lower, upper):
         print(i)
 print("done")
 print(time.time() - start)
-
